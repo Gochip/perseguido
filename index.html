@@ -1,9 +1,229 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title></title>
+        <title>Perseguido</title>
+        <script type="text/javascript" src="jquery.js"></script>
+        <script>
+            $(document).ready(function(){
+                var posInicial;
+                var posFinal;
+                var dificultad;
+                var nivel;
+                var filas;
+                var columnas;
+                var tiempoNivel;
+                var idTimeout = null;
+                var idInterval = null;
+                var iniciado = false;
+                var ARRIBA = 0, ABAJO = 1, IZQUIERDA = 2, DERECHA = 3;
+                function generarNivel(f, c){
+                    if(idTimeout != null && idInterval != null){
+                        clearInterval(idTimeout);
+                        clearInterval(idInterval);
+                    }
+                    $("#tblJuego tr").remove();
+                    var F = f; // Cantidad de filas
+                    var C = c; // Cantidad de columnas
+                    for(var i = 0; i < F; i++){
+                        var fila = "<tr>";
+                        for(var j = 0; j < C; j++){
+                            fila += "<td class='celda' data-fila='" + i + "' data-col='" + j + "'></td>";
+                        }
+                        fila += "</tr>";
+                        $("#tblJuego").append(fila);
+                    }
+                    $(".celda").click(function(){
+                        if(!iniciado) return;
+                        var fila = $(this).data("fila");
+                        var col = $(this).data("col");
+                        if(fila == posFinal.fila && col == posFinal.col){
+                            correcto();
+                            avanzarNivel();
+                        }else{
+                            perder();
+                        }
+                    });
+                    var t = parseInt(tiempoNivel / 1000);
+                    $("#lblTiempo").text("Tiempo: " + t);
+                    idInterval = setInterval(function(){
+                        t--;
+                        $("#lblTiempo").text("Tiempo: " + t);
+                    }, 1000);
+                    idTimeout = setTimeout(function(){
+                        perder();
+                    }, tiempoNivel);
+                }
+
+                function correcto(){
+                    $("#divMensaje").css("backgroundColor", "lawngreen");
+                    $("#divMensaje").text("CORRECTO!");
+                    $("#divMensaje").fadeIn();
+                    $("#divMensaje").fadeOut();
+                }
+
+                function ganar(){
+                    alert("FELICITACIONES GANASTE");
+                    $("#btnComenzar").fadeIn();
+                    iniciado = false;
+                    if(idTimeout != null && idInterval != null){
+                        clearInterval(idTimeout);
+                        clearInterval(idInterval);
+                    }
+                }
+
+                function perder(){
+                    iniciado = false;
+                    if(idTimeout != null && idInterval != null){
+                        clearInterval(idTimeout);
+                        clearInterval(idInterval);
+                    }
+                    $("#divMensaje").css("backgroundColor", "red");
+                    $("#divMensaje").text("PERDISTE!");
+                    $("#divMensaje").fadeIn();
+                    $("#btnComenzar").fadeIn();
+                }
+
+                function generarPosicionInicial(f, c){
+                    var fila = parseInt(Math.random() * f);
+                    var col = parseInt(Math.random() * c);
+                    posInicial = {};
+                    posInicial.fila = fila;
+                    posInicial.col = col;
+                    var celda = $("#tblJuego tr:nth-child(" + (fila + 1) + ") td:nth-child(" + (col + 1) + ")");
+                    celda.css("backgroundColor", "green");
+                }
+
+                function generarPosicionFinal(f, c){
+                    $("#divDatos").text("");
+                    var distancia = nivel + 1;
+                    var fila = posInicial.fila;
+                    var col = posInicial.col;
+                    var cadena = "";
+                    for(var i = 0; i < distancia; i++){
+                        var mov = parseInt(Math.random() * 4);
+                        switch(mov){
+                            case ARRIBA:
+                                if(fila > 0){
+                                    cadena += "ARRIBA - ";
+                                    fila--;
+                                }else{
+                                    i--;
+                                }
+                                break;
+                            case ABAJO:
+                                if(fila < f - 1){
+                                    cadena += "ABAJO - ";
+                                    fila++;
+                                }else{
+                                    i--;
+                                }
+                                break;
+                            case IZQUIERDA:
+                                if(col > 0){
+                                    cadena += "IZQ - ";
+                                    col--;
+                                }else{
+                                    i--;
+                                }
+                                break;
+                            case DERECHA:
+                                if(col < c - 1){
+                                    cadena += "DER - ";
+                                    col++;
+                                }else{
+                                    i--;
+                                }
+                                break;
+                        }
+                    }
+                    $("#divDatos").text(cadena);
+                    posFinal = {};
+                    posFinal.fila = fila;
+                    posFinal.col = col;
+                    /*var celda = $("#tblJuego tr:nth-child(" + (fila + 1) + ") td:nth-child(" + (col + 1) + ")");
+                    celda.css("backgroundColor", "orange");*/
+                }
+
+                function avanzarNivel(){
+                    nivel++;
+                    $("#lblNivel").text("Nivel: " + nivel);
+                    if(nivel == 11){
+                        ganar();
+                    }else{
+                        filas++;
+                        columnas++;
+                        generarNivel(filas, columnas);
+                        generarPosicionInicial(filas, columnas);
+                        generarPosicionFinal(filas, columnas);
+                    }
+                }
+
+                function iniciarJuego(){
+                    iniciado = true;
+                    nivel = 0;
+                    dificultad = 0;
+                    filas = 5;
+                    columnas = 5;
+                    tiempoNivel = 10000;
+                    avanzarNivel();
+                }
+
+                $("#btnComenzar").click(function(){
+                    $("#divMensaje").text("");
+                    $("#divMensaje").fadeOut();
+                    $(this).fadeOut();
+                    iniciarJuego();
+                });
+            });
+        </script>
+        <style>
+            *{
+                text-align: center;
+                font-family: Verdana;
+            }
+            body{
+                background-color: CornflowerBlue;
+            }
+            table{
+                margin: auto;
+            }
+            .celda{
+                width: 30px;
+                height: 30px;
+                border: 1px solid black;
+                background-color: lightgray;
+                cursor: pointer;
+            }
+            .celda:hover{
+                background-color: blue;
+            }
+            #divMensaje{
+                position: absolute;
+                display: none;
+                width: 20%;
+                top: 20%;
+                left: 40%;
+                height: 30px;
+                border: 1px solid black;
+                background-color: lawngreen;
+                border-radius: 5px;
+            }
+            #divDatos{
+                padding: 10px;
+                
+            }
+        </style>
     </head>
     <body>
         <h1>Bienvenido a perseguido</h1>
+        <div id="divParametros">
+            <label id="lblNivel"></label>
+            <label id="lblTiempo"></label>
+        </div>
+        <table id="tblJuego">
+        </table>
+        <div id="divDatos"></div>
+        <div id="divMensaje"></div>
+        <input type="button" id="btnComenzar" value="Comenzar" />
     </body>
 </html>
