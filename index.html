@@ -103,7 +103,7 @@
                         switch(mov){
                             case ARRIBA:
                                 if(fila > 0){
-                                    cadena += "ARRIBA - ";
+                                    cadena += "<img src='arr.png' />";
                                     fila--;
                                 }else{
                                     i--;
@@ -111,7 +111,7 @@
                                 break;
                             case ABAJO:
                                 if(fila < f - 1){
-                                    cadena += "ABAJO - ";
+                                    cadena += "<img src='aba.png' />";
                                     fila++;
                                 }else{
                                     i--;
@@ -119,7 +119,7 @@
                                 break;
                             case IZQUIERDA:
                                 if(col > 0){
-                                    cadena += "IZQ - ";
+                                    cadena += "<img src='izq.png' />";
                                     col--;
                                 }else{
                                     i--;
@@ -127,7 +127,7 @@
                                 break;
                             case DERECHA:
                                 if(col < c - 1){
-                                    cadena += "DER - ";
+                                    cadena += "<img src='der.png' />";
                                     col++;
                                 }else{
                                     i--;
@@ -135,7 +135,7 @@
                                 break;
                         }
                     }
-                    $("#divDatos").text(cadena);
+                    $("#divDatos").html(cadena);
                     posFinal = {};
                     posFinal.fila = fila;
                     posFinal.col = col;
