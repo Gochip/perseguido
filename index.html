@@ -34,6 +34,23 @@
                         fila += "</tr>";
                         $("#tblJuego").append(fila);
                     }
+                    if (nivel <= 8) {
+                        $(".celda").css({
+                            width: "40px",
+                            height: "40px"
+                        });
+                    } else if (nivel <= 9) {
+                        $(".celda").css({
+                            width: "30px",
+                            height: "30px"
+                        });
+                    } else {
+                        $(".celda").css({
+                            width: "40px",
+                            height: "40px"
+                        });
+                    }
+                    
                     $(".celda").click(function(){
                         if(!iniciado) return;
                         var fila = $(this).data("fila");
@@ -44,7 +61,7 @@
                                 avanzarNivel();
                             }, 1000);
                         }else{
-                            perder();
+                            perder(false);
                         }
                     });
                     var t = parseInt(tiempoNivel / 1000);
@@ -54,7 +71,7 @@
                         $("#lblTiempo").text("Tiempo: " + t);
                     }, 1000);
                     idTimeout = setTimeout(function(){
-                        perder();
+                        perder(true);
                     }, tiempoNivel);
                 }
 
@@ -70,8 +87,11 @@
                 }
 
                 function ganar(){
-                    alert("FELICITACIONES GANASTE");
-                    $("#btnComenzar").fadeIn();
+                    $("#divMensaje").css("backgroundColor", "#51a400");
+                    $("#divMensaje").text("¡GANASTE!");
+                    $("#divMensaje").fadeIn();
+                    $("#capaGris").fadeIn();
+                    $("#btnVolver").fadeIn();
                     iniciado = false;
                     if(idTimeout != null && idInterval != null){
                         clearInterval(idTimeout);
@@ -79,7 +99,7 @@
                     }
                 }
 
-                function perder(){
+                function perder(tiempoAcabado = false){
                     var sound = new Howl({
                         src: ["res/sounds/mario-bros-die.mp3"]
                     });
@@ -90,11 +110,14 @@
                         clearInterval(idInterval);
                     }
                     $("#divMensaje").css("backgroundColor", "red");
-                    $("#divMensaje").text("PERDISTE!");
+                    if (tiempoAcabado) {
+                        $("#divMensaje").text("PERDISTE. SE ACABÓ EL TIEMPO.");
+                    } else {
+                        $("#divMensaje").text("PERDISTE. TE EQUIVOCASTE.");
+                    }
                     $("#divMensaje").fadeIn();
                     $("#capaGris").fadeIn();
                     $("#btnVolver").fadeIn();
-                    $("#btnComenzar").fadeIn();
                 }
 
                 function generarPosicionInicial(f, c){
@@ -160,8 +183,8 @@
 
                 function avanzarNivel(){
                     nivel++;
-                    $("#lblNivel").text("Nivel: " + nivel);
-                    if(nivel == 11){
+                    $("#lblNivel").text("Nivel: " + nivel + "/9");
+                    if(nivel == 10){
                         ganar();
                     }else{
                         filas++;
@@ -183,6 +206,7 @@
                 }
 
                 $("#btnComenzar").click(function(){
+                    openFullscreen();
                     $("#panelInicial").fadeOut();
                     $("#panelJuego").fadeIn();
                     iniciarJuego();
@@ -191,6 +215,21 @@
                 $("#btnVolver").click(function() {
                     location.href = "";
                 });
+                
+                /* Get the element you want displayed in fullscreen mode (a video in this example): */
+                var elem = document.getElementById("contenedor");
+
+                /* When the openFullscreen() function is executed, open the video in fullscreen.
+                Note that we must include prefixes for different browsers, as they don't support the requestFullscreen property yet */
+                function openFullscreen() {
+                  if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                  } else if (elem.webkitRequestFullscreen) { /* Safari */
+                    elem.webkitRequestFullscreen();
+                  } else if (elem.msRequestFullscreen) { /* IE11 */
+                    elem.msRequestFullscreen();
+                  }
+                }
             });
         </script>
         <style>
@@ -212,8 +251,8 @@
                 margin: auto;
             }
             .celda{
-                width: 20px;
-                height: 20px;
+                width: 40px;
+                height: 40px;
                 border: 1px solid black;
                 background-color: lightgray;
                 cursor: pointer;
@@ -224,11 +263,12 @@
             #divMensaje{
                 position: absolute;
                 display: none;
-                width: 200px;
+                width: 100%;
                 top: calc(50% - 30px);
-                left: calc(50% - 100px);
-                height: 60px;
-                font-size: 44px;
+                left: 0px;
+                text-align: center;
+                height: 44px;
+                font-size: 34px;
                 border: 1px solid black;
                 background-color: lawngreen;
                 border-radius: 5px;
@@ -263,9 +303,9 @@
             #panelJuego {
                 display: none;
                 position:absolute;
-                height: 500px;
+                height: 100%;
                 width: 500px;
-                top: calc(50% - 250px);
+                top: 0px;
                 left: calc(50% - 250px);
             }
             #capaGris {
@@ -301,23 +341,25 @@
         </style>
     </head>
     <body>
-        <div id="panelInicial">
-            <h1>Es hora de desestresarte...</h1>
-            <h2>¡Juega ahora!</h2>
-            <input type="button" class="boton" id="btnComenzar" value="Comenzar" />
-        </div>
-        
-        <div id="panelJuego">
-            <div id="divParametros">
-                <label id="lblNivel"></label>
-                <label id="lblTiempo"></label>
+        <div id="contenedor">
+            <div id="panelInicial">
+                <h1>Es hora de divertirte...</h1>
+                <h2>¡Juega ahora!</h2>
+                <input type="button" class="boton" id="btnComenzar" value="Comenzar" />
             </div>
-            <table id="tblJuego"></table>
-            <div id="divDatos"></div>
-            <div id="divMensaje"></div>
-            <button id="btnVolver" class="boton" href="">Volver</button>
+            
+            <div id="panelJuego">
+                <div id="divParametros">
+                    <label id="lblNivel"></label>
+                    <label id="lblTiempo"></label>
+                </div>
+                <table id="tblJuego"></table>
+                <div id="divDatos"></div>
+                <div id="divMensaje"></div>
+                <button id="btnVolver" class="boton" href="">Volver</button>
+            </div>
+            
+            <div id="capaGris"></div>
         </div>
-        
-        <div id="capaGris"></div>
     </body>
 </html>
