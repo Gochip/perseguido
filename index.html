@@ -87,6 +87,10 @@
                 }
 
                 function ganar(){
+                    var sound = new Howl({
+                        src: ["res/sounds/correct-victory.mp3"]
+                    });
+                    sound.play();
                     $("#divMensaje").css("backgroundColor", "#51a400");
                     $("#divMensaje").text("¡GANASTE!");
                     $("#divMensaje").fadeIn();
